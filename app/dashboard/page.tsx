@@ -412,3 +412,5 @@ function DashboardPage() {
 
 // Export the component wrapped with authentication
 export default withAuth(DashboardPage);
+  )
+}
