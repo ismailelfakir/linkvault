@@ -259,7 +259,13 @@ export const getPublicProfile = async (username: string): Promise<{ profile: Use
     
     // Get user's active links
     console.log('🔗 Loading links for user:', profile.uid);
-    const links = await getUserLinks(profile.uid);
+    let links: Link[] = [];
+    try {
+      links = await getUserLinks(profile.uid);
+    } catch (linkError) {
+      console.error('❌ Error loading links, continuing with empty array:', linkError);
+      links = [];
+    }
     console.log('📋 Found links:', links);
     const activeLinks = links.filter(link => link.isActive);
     console.log('✅ Active links:', activeLinks);
@@ -267,6 +273,7 @@ export const getPublicProfile = async (username: string): Promise<{ profile: Use
     return { profile, links: activeLinks };
   } catch (error) {
     console.error('❌ Error getting public profile:', error);
+    console.error('❌ Error details:', error.message);
     return null;
   }
 };
