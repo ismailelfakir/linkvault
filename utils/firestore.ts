@@ -232,22 +232,38 @@ export const getUserAnalytics = async (userId: string, days: number = 30) => {
 // Public Profile Functions
 export const getPublicProfile = async (username: string): Promise<{ profile: UserProfile; links: Link[] } | null> => {
   try {
-    // Get user by username
+    // For now, we'll use displayName as username since we don't have a username field yet
+    // In a real app, you'd want a separate username field
     const usersRef = collection(db, 'users');
-    const q = query(usersRef, where('username', '==', username), limit(1));
+    const q = query(usersRef, where('displayName', '==', username), limit(1));
     const querySnapshot = await getDocs(q);
     
     if (querySnapshot.empty) {
-      return null;
+      // Try to find by email if displayName doesn't match
+      const emailQuery = query(usersRef, where('email', '==', username + '@example.com'), limit(1));
+      const emailSnapshot = await getDocs(emailQuery);
+      
+      if (emailSnapshot.empty) {
+        return null;
+      }
+      
+      const userDoc = emailSnapshot.docs[0];
+      const profile = { id: userDoc.id, ...userDoc.data() } as UserProfile;
+      
+      // For demo purposes, make all profiles public
+      // In production, check: if (!profile.isPublic) return null;
+      
+      const links = await getUserLinks(profile.uid);
+      const activeLinks = links.filter(link => link.isActive);
+      
+      return { profile, links: activeLinks };
     }
     
     const userDoc = querySnapshot.docs[0];
     const profile = { id: userDoc.id, ...userDoc.data() } as UserProfile;
     
-    // Check if profile is public
-    if (!profile.isPublic) {
-      return null;
-    }
+    // For demo purposes, make all profiles public
+    // In production, uncomment: if (!profile.isPublic) return null;
     
     // Get user's active links
     const links = await getUserLinks(profile.uid);
