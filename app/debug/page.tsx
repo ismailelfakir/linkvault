@@ -58,6 +58,16 @@ export default function DebugPage() {
     }
   };
 
+  const testPublicProfile = async () => {
+    try {
+      console.log('🧪 Testing public profile lookup...');
+      const { getPublicProfile } = await import('@/utils/firestore');
+      const result = await getPublicProfile('ismailelfakir');
+      console.log('🧪 Test result:', result);
+    } catch (error) {
+      console.error('🧪 Test error:', error);
+    }
+  };
   if (!user) {
     return <div>Please log in to view debug info</div>;
   }
@@ -76,6 +86,9 @@ export default function DebugPage() {
               </Button>
               <Button onClick={checkCurrentUser} variant="outline">
                 Check Current User
+              </Button>
+              <Button onClick={() => window.open('/ismailelfakir', '_blank')} variant="secondary">
+                Test Profile Page
               </Button>
             </div>
             

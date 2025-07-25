@@ -232,54 +232,41 @@ export const getUserAnalytics = async (userId: string, days: number = 30) => {
 // Public Profile Functions
 export const getPublicProfile = async (username: string): Promise<{ profile: UserProfile; links: Link[] } | null> => {
   try {
-    console.log('Looking for username:', username);
+    console.log('🔍 Looking for username:', username);
     
     // First try to find by username field
     const usersRef = collection(db, 'users');
     const q = query(usersRef, where('username', '==', username.toLowerCase()), limit(1));
     const querySnapshot = await getDocs(q);
     
-    console.log('Username query results:', querySnapshot.size);
+    console.log('📊 Username query results:', querySnapshot.size);
     
     if (querySnapshot.empty) {
-      // Fallback: try to find by displayName converted to username format
-      const displayNameQuery = query(usersRef, where('displayName', '==', username.replace(/([a-z])([A-Z])/g, '$1 $2')), limit(1));
-      const displayNameSnapshot = await getDocs(displayNameQuery);
-      
-      console.log('DisplayName fallback results:', displayNameSnapshot.size);
-      
-      if (displayNameSnapshot.empty) {
-        console.log('No profile found for:', username);
-        return null;
-      }
-      
-      const userDoc = displayNameSnapshot.docs[0];
-      const profile = { id: userDoc.id, ...userDoc.data() } as UserProfile;
-      
-      // Check if profile is public
-      if (!profile.isPublic) return null;
-      
-      const links = await getUserLinks(profile.uid);
-      const activeLinks = links.filter(link => link.isActive);
-      
-      return { profile, links: activeLinks };
+      console.log('❌ No profile found for username:', username);
+      return null;
     }
     
     const userDoc = querySnapshot.docs[0];
     const profile = { id: userDoc.id, ...userDoc.data() } as UserProfile;
     
-    console.log('Found profile:', profile);
+    console.log('✅ Found profile:', profile);
     
     // Check if profile is public
-    if (!profile.isPublic) return null;
+    if (!profile.isPublic) {
+      console.log('❌ Profile is not public');
+      return null;
+    }
     
     // Get user's active links
+    console.log('🔗 Loading links for user:', profile.uid);
     const links = await getUserLinks(profile.uid);
+    console.log('📋 Found links:', links);
     const activeLinks = links.filter(link => link.isActive);
+    console.log('✅ Active links:', activeLinks);
     
     return { profile, links: activeLinks };
   } catch (error) {
-    console.error('Error getting public profile:', error);
+    console.error('❌ Error getting public profile:', error);
     throw error;
   }
 };
