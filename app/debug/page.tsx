@@ -81,6 +81,41 @@ export default function DebugPage() {
       console.error('🧪 Test error:', error);
     }
   };
+
+  const testLinkCreation = async () => {
+    if (!user) {
+      console.log('❌ No user logged in');
+      return;
+    }
+
+    try {
+      console.log('🧪 Testing link creation...');
+      const { createLink } = await import('@/utils/firestore');
+      
+      const testLinkData = {
+        userId: user.uid,
+        title: 'Test Link',
+        url: 'https://example.com',
+        description: 'This is a test link',
+        icon: 'globe',
+        isActive: true,
+        order: 0,
+      };
+      
+      console.log('🔗 Creating test link with data:', testLinkData);
+      const createdLink = await createLink(testLinkData);
+      console.log('✅ Test link created successfully:', createdLink);
+      
+      // Reload all data to see the new link
+      await loadAllData();
+      
+    } catch (error) {
+      console.error('❌ Test link creation failed:', error);
+      console.error('❌ Error details:', error.message);
+      console.error('❌ Error code:', error.code);
+    }
+  };
+
   if (!user) {
     return <div>Please log in to view debug info</div>;
   }
