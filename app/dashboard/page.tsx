@@ -1,35 +1,63 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { getUserLinks } from '@/utils/firestore';
 import { withAuth } from '@/components/withAuth';
+import LinkBuilder from '@/components/LinkBuilder';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { useRouter } from 'next/navigation';
 import { 
   LogOut, 
   Settings, 
-  Plus, 
   BarChart3, 
   Link as LinkIcon,
   Users,
   Eye,
-  ExternalLink
+  ExternalLink,
+  Globe
 } from 'lucide-react';
+
+interface Link {
+  id?: string;
+  userId: string;
+  title: string;
+  url: string;
+  description?: string;
+  icon?: string;
+  isActive: boolean;
+  order: number;
+  clicks: number;
+  createdAt: any;
+  updatedAt: any;
+}
 
 function DashboardPage() {
   const { user, userProfile, logout } = useAuth();
-  const [isAddLinkOpen, setIsAddLinkOpen] = useState(false);
-  const [newLink, setNewLink] = useState({
-    title: '',
-    url: '',
-    description: ''
-  });
+  const router = useRouter();
+  const [links, setLinks] = useState<Link[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      loadLinks();
+    }
+  }, [user]);
+
+  const loadLinks = async () => {
+    try {
+      setLoading(true);
+      const userLinks = await getUserLinks(user!.uid);
+      setLinks(userLinks);
+    } catch (error) {
+      console.error('Error loading links:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -40,11 +68,9 @@ function DashboardPage() {
     }
   };
 
-  const handleAddLink = () => {
-    // TODO: Implement link creation logic
-    console.log('Adding new link:', newLink);
-    setIsAddLinkOpen(false);
-    setNewLink({ title: '', url: '', description: '' });
+  const getIconComponent = (iconName: string) => {
+    // Simple icon mapping - you can expand this
+    return Globe;
   };
 
   const getInitials = (name: string) => {
@@ -106,9 +132,9 @@ function DashboardPage() {
                 <LinkIcon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">0</div>
+                <div className="text-2xl font-bold">{links.length}</div>
                 <p className="text-xs text-muted-foreground">
-                  No links created yet
+                  {links.length === 0 ? 'No links created yet' : `${links.filter(l => l.isActive).length} active`}
                 </p>
               </CardContent>
             </Card>
@@ -119,9 +145,9 @@ function DashboardPage() {
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">0</div>
+                <div className="text-2xl font-bold">{links.reduce((sum, link) => sum + link.clicks, 0)}</div>
                 <p className="text-xs text-muted-foreground">
-                  No clicks recorded
+                  {links.length === 0 ? 'No clicks recorded' : 'Total link clicks'}
                 </p>
               </CardContent>
             </Card>
@@ -151,295 +177,233 @@ function DashboardPage() {
                 </p>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Profile Overview */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Your Bio Link Page</CardTitle>
-                <CardDescription>
-                  This is how your bio link page will appear to visitors
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-gradient-to-br from-purple-100/50 to-blue-100/50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-                  <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700 max-w-sm mx-auto">
-                    <div className="text-center">
-                      <Avatar className="w-20 h-20 mx-auto mb-4">
+
+
+
+          {/* Main Dashboard Content */}
+          <Tabs defaultValue="links" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="links">Links</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="links" className="space-y-6">
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Links</CardTitle>
+                    <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">0</div>
+                    <p className="text-xs text-muted-foreground">
+                      Links created
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
+                    <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">0</div>
+                    <p className="text-xs text-muted-foreground">
+                      Clicks recorded
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Profile Views</CardTitle>
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">0</div>
+                    <p className="text-xs text-muted-foreground">
+                      Page views
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Active Links</CardTitle>
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">0</div>
+                    <p className="text-xs text-muted-foreground">
+                      Currently active
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Link Builder Component */}
+              <LinkBuilder />
+            </TabsContent>
+            
+            <TabsContent value="analytics">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Analytics</CardTitle>
+                  <CardDescription>
+                    Track your link performance and visitor insights
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8">
+                    <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                      Analytics Coming Soon
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Detailed analytics will be available once you start getting clicks
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="profile">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Profile Information</CardTitle>
+                    <CardDescription>
+                      Manage your public profile details
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-3">
+                      <Avatar className="w-16 h-16">
                         <AvatarImage src={userProfile.avatar} />
                         <AvatarFallback className="text-lg">
                           {getInitials(userProfile.displayName)}
                         </AvatarFallback>
                       </Avatar>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                        {userProfile.displayName}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-300 mb-6">
-                        {userProfile.bio || 'Add a bio to tell visitors about yourself'}
-                      </p>
+                      <div>
+                        <h3 className="font-medium text-lg">{userProfile.displayName}</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {userProfile.email}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Bio</span>
+                        <p className="text-sm">
+                          {userProfile.bio || 'No bio added yet'}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Member Since</span>
+                        <p className="text-sm">
+                          {userProfile.createdAt?.toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <Button variant="outline" className="w-full">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Edit Profile
+                    </Button>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Bio Link Preview</CardTitle>
+                    <CardDescription>
+                      This is how your page appears to visitors
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-gradient-to-br from-purple-100/50 to-blue-100/50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700 max-w-sm mx-auto">
+                        <div className="text-center">
+                          <Avatar className="w-20 h-20 mx-auto mb-4">
+                            <AvatarImage src={userProfile.avatar} />
+                            <AvatarFallback className="text-lg">
+                              {getInitials(userProfile.displayName)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                            {userProfile.displayName}
+                          </h3>
+                          <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm">
+                            {userProfile.bio || 'Add a bio to tell visitors about yourself'}
+                          </p>
+                          <div className="space-y-3">
+                            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 text-gray-500 dark:text-gray-400 text-sm">
+                              Your links will appear here
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="settings">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Account Settings</CardTitle>
+                  <CardDescription>
+                    Manage your account preferences and security
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-3">
-                        <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 text-gray-500 dark:text-gray-400 text-sm">
-                          No links added yet
+                        <div>
+                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Account Status</span>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                              Active
+                            </Badge>
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Theme</span>
+                          <p className="text-sm mt-1">{userProfile.theme || 'Default'}</p>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div>
+                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Profile URL</span>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <span className="text-sm">Coming soon</span>
+                            <Button variant="ghost" size="sm" className="h-auto p-0">
+                              <ExternalLink className="w-3 h-3" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-                <div className="mt-4 flex justify-center">
-                  <Dialog open={isAddLinkOpen} onOpenChange={setIsAddLinkOpen}>
-                    <DialogTrigger asChild>
-                      <Button>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add New Link
+                    
+                    <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
+                      <Button variant="destructive" onClick={handleLogout}>
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Sign Out
                       </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle>Add New Link</DialogTitle>
-                        <DialogDescription>
-                          Create a new link for your bio page. Make sure to include the full URL.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor="title">Title</Label>
-                          <Input
-                            id="title"
-                            placeholder="e.g., My YouTube Channel"
-                            value={newLink.title}
-                            onChange={(e) => setNewLink(prev => ({ ...prev, title: e.target.value }))}
-                          />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor="url">URL</Label>
-                          <Input
-                            id="url"
-                            placeholder="https://example.com"
-                            value={newLink.url}
-                            onChange={(e) => setNewLink(prev => ({ ...prev, url: e.target.value }))}
-                          />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor="description">Description (Optional)</Label>
-                          <Textarea
-                            id="description"
-                            placeholder="Brief description of this link"
-                            value={newLink.description}
-                            onChange={(e) => setNewLink(prev => ({ ...prev, description: e.target.value }))}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex justify-end space-x-2">
-                        <Button variant="outline" onClick={() => setIsAddLinkOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button onClick={handleAddLink} disabled={!newLink.title || !newLink.url}>
-                          Add Link
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Profile Settings</CardTitle>
-                <CardDescription>
-                  Manage your profile information
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Avatar>
-                    <AvatarImage src={userProfile.avatar} />
-                    <AvatarFallback>
-                      {getInitials(userProfile.displayName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium">{userProfile.displayName}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {userProfile.email}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Theme</span>
-                    <Badge variant="secondary">{userProfile.theme || 'Default'}</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Member since</span>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {userProfile.createdAt?.toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Profile URL</span>
-                    <Button variant="ghost" size="sm" className="h-auto p-0">
-                      <ExternalLink className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-                
-                <Button variant="outline" className="w-full">
-                  <Settings className="w-4 h-4 mr-2" />
-                  Edit Profile
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>
-                Get started with these common tasks
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
-                      <Plus className="w-6 h-6" />
-                      <span>Add Link</span>
-                      <span className="text-xs text-gray-500">Create your first bio link</span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Add New Link</DialogTitle>
-                      <DialogDescription>
-                        Create a new link for your bio page.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="text-center py-4">
-                      <p className="text-gray-600 dark:text-gray-400">Link creation form will be implemented in the next step.</p>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
-                  <Settings className="w-6 h-6" />
-                  <span>Customize Theme</span>
-                  <span className="text-xs text-gray-500">Change colors and layout</span>
-                </Button>
-                
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
-                  <BarChart3 className="w-6 h-6" />
-                  <span>View Analytics</span>
-                  <span className="text-xs text-gray-500">Track your performance</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* User Info Summary Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Summary</CardTitle>
-              <CardDescription>
-                Your LinkVault account information
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <div>
-                    <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">Full Name</Label>
-                    <p className="text-lg font-semibold">{userProfile.displayName}</p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">Email Address</Label>
-                    <p className="text-lg">{userProfile.email}</p>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div>
-                    <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">Account Status</Label>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                        Active
-                      </Badge>
                     </div>
                   </div>
-                  <div>
-                    <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">Member Since</Label>
-                    <p className="text-lg">{userProfile.createdAt?.toLocaleDateString()}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h4 className="font-medium">Quick Actions</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Manage your account</p>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Dialog open={isAddLinkOpen} onOpenChange={setIsAddLinkOpen}>
-                      <DialogTrigger asChild>
-                        <Button size="sm">
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add New Link
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                          <DialogTitle>Add New Link</DialogTitle>
-                          <DialogDescription>
-                            Create a new link for your bio page. Make sure to include the full URL.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                          <div className="grid gap-2">
-                            <Label htmlFor="quick-title">Title</Label>
-                            <Input
-                              id="quick-title"
-                              placeholder="e.g., My YouTube Channel"
-                              value={newLink.title}
-                              onChange={(e) => setNewLink(prev => ({ ...prev, title: e.target.value }))}
-                            />
-                          </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor="quick-url">URL</Label>
-                            <Input
-                              id="quick-url"
-                              placeholder="https://example.com"
-                              value={newLink.url}
-                              onChange={(e) => setNewLink(prev => ({ ...prev, url: e.target.value }))}
-                            />
-                          </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor="quick-description">Description (Optional)</Label>
-                            <Textarea
-                              id="quick-description"
-                              placeholder="Brief description of this link"
-                              value={newLink.description}
-                              onChange={(e) => setNewLink(prev => ({ ...prev, description: e.target.value }))}
-                            />
-                          </div>
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={() => setIsAddLinkOpen(false)}>
-                            Cancel
-                          </Button>
-                          <Button onClick={handleAddLink} disabled={!newLink.title || !newLink.url}>
-                            Add Link
-                          </Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
