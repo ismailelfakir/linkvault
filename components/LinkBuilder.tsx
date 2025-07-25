@@ -124,11 +124,21 @@ export default function LinkBuilder() {
         order: links.length,
       };
 
+      console.log('📝 About to create link with data:', linkData);
       const createdLink = await createLink(linkData);
       console.log('Link created successfully:', createdLink);
+      
+      // Update local state immediately
       setLinks(prev => [...prev, createdLink]);
+      console.log('📝 Updated local links state');
+      
+      // Reset form
       setNewLink({ title: '', url: '', description: '', icon: 'globe' });
       setIsAddLinkOpen(false);
+      
+      // Force reload links from database to ensure consistency
+      console.log('📝 Reloading links from database...');
+      await loadLinks();
     } catch (error) {
       console.error('Error creating link:', error);
       setError('Failed to create link');

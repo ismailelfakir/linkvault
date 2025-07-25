@@ -108,6 +108,7 @@ export const updateUserProfile = async (uid: string, updates: Partial<UserProfil
 // Link Functions
 export const createLink = async (linkData: Omit<Link, 'id' | 'createdAt' | 'updatedAt' | 'clicks'>) => {
   try {
+    console.log('🔗 Creating link with data:', linkData);
     const linksRef = collection(db, 'links');
     const newLink = {
       ...linkData,
@@ -116,16 +117,23 @@ export const createLink = async (linkData: Omit<Link, 'id' | 'createdAt' | 'upda
       updatedAt: Timestamp.now(),
     };
     
+    console.log('🔗 Prepared link data:', newLink);
     const docRef = await addDoc(linksRef, newLink);
-    return { id: docRef.id, ...newLink };
+    console.log('🔗 Link created with ID:', docRef.id);
+    
+    const createdLink = { id: docRef.id, ...newLink };
+    console.log('🔗 Returning created link:', createdLink);
+    return createdLink;
   } catch (error) {
     console.error('Error creating link:', error);
+    console.error('Error details:', error.message);
     throw error;
   }
 };
 
 export const getUserLinks = async (userId: string): Promise<Link[]> => {
   try {
+    console.log('🔗 getUserLinks called with userId:', userId);
     const linksRef = collection(db, 'links');
     const q = query(
       linksRef, 
@@ -133,16 +141,22 @@ export const getUserLinks = async (userId: string): Promise<Link[]> => {
       orderBy('order', 'asc')
     );
     
+    console.log('🔗 Executing Firestore query...');
     const querySnapshot = await getDocs(q);
+    console.log('🔗 Query completed, docs found:', querySnapshot.size);
     const links: Link[] = [];
     
     querySnapshot.forEach((doc) => {
+      console.log('🔗 Processing doc:', doc.id, doc.data());
       links.push({ id: doc.id, ...doc.data() } as Link);
     });
     
+    console.log('🔗 Final links array:', links);
     return links;
   } catch (error) {
     console.error('Error getting user links:', error);
+    console.error('❌ Error details:', error.message);
+    console.error('❌ Error code:', error.code);
     throw error;
   }
 };

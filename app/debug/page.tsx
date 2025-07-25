@@ -110,6 +110,9 @@ export default function DebugPage() {
               }} variant="secondary">
                 Test Profile Page
               </Button>
+              <Button onClick={testLinkCreation} variant="destructive">
+                Test Link Creation
+              </Button>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
