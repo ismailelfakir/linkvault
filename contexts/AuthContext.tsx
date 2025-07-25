@@ -20,6 +20,7 @@ interface UserProfile {
   bio?: string;
   avatar?: string;
   theme?: string;
+  isPublic?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -89,8 +90,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         uid: user.uid,
         email: user.email!,
         displayName,
+        username: displayName.toLowerCase().replace(/\s+/g, ''),
         bio: '',
         theme: 'default',
+        isPublic: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       };

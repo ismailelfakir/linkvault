@@ -232,26 +232,25 @@ export const getUserAnalytics = async (userId: string, days: number = 30) => {
 // Public Profile Functions
 export const getPublicProfile = async (username: string): Promise<{ profile: UserProfile; links: Link[] } | null> => {
   try {
-    // For now, we'll use displayName as username since we don't have a username field yet
-    // In a real app, you'd want a separate username field
+    // First try to find by username field
     const usersRef = collection(db, 'users');
-    const q = query(usersRef, where('displayName', '==', username), limit(1));
+    const q = query(usersRef, where('username', '==', username.toLowerCase()), limit(1));
     const querySnapshot = await getDocs(q);
     
     if (querySnapshot.empty) {
-      // Try to find by email if displayName doesn't match
-      const emailQuery = query(usersRef, where('email', '==', username + '@example.com'), limit(1));
-      const emailSnapshot = await getDocs(emailQuery);
+      // Fallback: try to find by displayName (for existing users)
+      const displayNameQuery = query(usersRef, where('displayName', '==', username), limit(1));
+      const displayNameSnapshot = await getDocs(displayNameQuery);
       
-      if (emailSnapshot.empty) {
+      if (displayNameSnapshot.empty) {
         return null;
       }
       
-      const userDoc = emailSnapshot.docs[0];
+      const userDoc = displayNameSnapshot.docs[0];
       const profile = { id: userDoc.id, ...userDoc.data() } as UserProfile;
       
-      // For demo purposes, make all profiles public
-      // In production, check: if (!profile.isPublic) return null;
+      // Check if profile is public
+      if (!profile.isPublic) return null;
       
       const links = await getUserLinks(profile.uid);
       const activeLinks = links.filter(link => link.isActive);
@@ -262,8 +261,8 @@ export const getPublicProfile = async (username: string): Promise<{ profile: Use
     const userDoc = querySnapshot.docs[0];
     const profile = { id: userDoc.id, ...userDoc.data() } as UserProfile;
     
-    // For demo purposes, make all profiles public
-    // In production, uncomment: if (!profile.isPublic) return null;
+    // Check if profile is public
+    if (!profile.isPublic) return null;
     
     // Get user's active links
     const links = await getUserLinks(profile.uid);

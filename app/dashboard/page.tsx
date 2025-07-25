@@ -331,13 +331,13 @@ function DashboardPage() {
                           <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Profile URL</span>
                           <div className="flex items-center space-x-2 mt-1">
                             <span className="text-sm font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                              /{userProfile.displayName}
+                              /{userProfile.username || userProfile.displayName.toLowerCase().replace(/\s+/g, '')}
                             </span>
                             <Button 
                               variant="ghost" 
                               size="sm" 
                               className="h-auto p-0"
-                              onClick={() => window.open(`/${userProfile.displayName}`, '_blank')}
+                              onClick={() => window.open(`/${userProfile.username || userProfile.displayName.toLowerCase().replace(/\s+/g, '')}`, '_blank')}
                             >
                               <ExternalLink className="w-3 h-3" />
                             </Button>

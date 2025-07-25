@@ -113,11 +113,15 @@ export default function PublicProfilePage() {
     try {
       setClickingLinkId(link.id);
       
+      console.log('Recording click for link:', link.id);
+      
       // Record the click
       await recordClick(link.id, link.userId, {
         userAgent: navigator.userAgent,
         referrer: document.referrer,
       });
+      
+      console.log('Click recorded successfully');
       
       // Update local click count
       setLinks(prev => prev.map(l => 
