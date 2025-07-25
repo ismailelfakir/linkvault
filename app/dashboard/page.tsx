@@ -1,13 +1,16 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { withAuth } from '@/components/withAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   LogOut, 
   Settings, 
@@ -15,18 +18,18 @@ import {
   BarChart3, 
   Link as LinkIcon,
   Users,
-  Eye
+  Eye,
+  ExternalLink
 } from 'lucide-react';
 
-export default function DashboardPage() {
-  const { user, userProfile, loading, logout } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
-    }
-  }, [user, loading, router]);
+function DashboardPage() {
+  const { user, userProfile, logout } = useAuth();
+  const [isAddLinkOpen, setIsAddLinkOpen] = useState(false);
+  const [newLink, setNewLink] = useState({
+    title: '',
+    url: '',
+    description: ''
+  });
 
   const handleLogout = async () => {
     try {
@@ -37,27 +40,12 @@ export default function DashboardPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="space-y-6">
-            <Skeleton className="h-8 w-64" />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Skeleton className="h-32" />
-              <Skeleton className="h-32" />
-              <Skeleton className="h-32" />
-            </div>
-            <Skeleton className="h-64" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user || !userProfile) {
-    return null;
-  }
+  const handleAddLink = () => {
+    // TODO: Implement link creation logic
+    console.log('Adding new link:', newLink);
+    setIsAddLinkOpen(false);
+    setNewLink({ title: '', url: '', description: '' });
+  };
 
   const getInitials = (name: string) => {
     return name
@@ -67,6 +55,11 @@ export default function DashboardPage() {
       .toUpperCase()
       .slice(0, 2);
   };
+
+  // Ensure user and userProfile exist (withAuth should handle this, but extra safety)
+  if (!user || !userProfile) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -83,7 +76,7 @@ export default function DashboardPage() {
                   Welcome back, {userProfile.displayName}!
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Manage your bio links and track performance
+                  Email: {userProfile.email}
                 </p>
               </div>
             </div>
@@ -194,10 +187,59 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="mt-4 flex justify-center">
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Your First Link
-                  </Button>
+                  <Dialog open={isAddLinkOpen} onOpenChange={setIsAddLinkOpen}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add New Link
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Add New Link</DialogTitle>
+                        <DialogDescription>
+                          Create a new link for your bio page. Make sure to include the full URL.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="title">Title</Label>
+                          <Input
+                            id="title"
+                            placeholder="e.g., My YouTube Channel"
+                            value={newLink.title}
+                            onChange={(e) => setNewLink(prev => ({ ...prev, title: e.target.value }))}
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="url">URL</Label>
+                          <Input
+                            id="url"
+                            placeholder="https://example.com"
+                            value={newLink.url}
+                            onChange={(e) => setNewLink(prev => ({ ...prev, url: e.target.value }))}
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="description">Description (Optional)</Label>
+                          <Textarea
+                            id="description"
+                            placeholder="Brief description of this link"
+                            value={newLink.description}
+                            onChange={(e) => setNewLink(prev => ({ ...prev, description: e.target.value }))}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <Button variant="outline" onClick={() => setIsAddLinkOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button onClick={handleAddLink} disabled={!newLink.title || !newLink.url}>
+                          Add Link
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardContent>
             </Card>
@@ -236,6 +278,12 @@ export default function DashboardPage() {
                       {userProfile.createdAt?.toLocaleDateString()}
                     </span>
                   </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Profile URL</span>
+                    <Button variant="ghost" size="sm" className="h-auto p-0">
+                      <ExternalLink className="w-3 h-3" />
+                    </Button>
+                  </div>
                 </div>
                 
                 <Button variant="outline" className="w-full">
@@ -256,7 +304,151 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
+                      <Plus className="w-6 h-6" />
+                      <span>Add Link</span>
+                      <span className="text-xs text-gray-500">Create your first bio link</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add New Link</DialogTitle>
+                      <DialogDescription>
+                        Create a new link for your bio page.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="text-center py-4">
+                      <p className="text-gray-600 dark:text-gray-400">Link creation form will be implemented in the next step.</p>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                
                 <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
+                  <Settings className="w-6 h-6" />
+                  <span>Customize Theme</span>
+                  <span className="text-xs text-gray-500">Change colors and layout</span>
+                </Button>
+                
+                <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
+                  <BarChart3 className="w-6 h-6" />
+                  <span>View Analytics</span>
+                  <span className="text-xs text-gray-500">Track your performance</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* User Info Summary Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Account Summary</CardTitle>
+              <CardDescription>
+                Your LinkVault account information
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">Full Name</Label>
+                    <p className="text-lg font-semibold">{userProfile.displayName}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">Email Address</Label>
+                    <p className="text-lg">{userProfile.email}</p>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">Account Status</Label>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        Active
+                      </Badge>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">Member Since</Label>
+                    <p className="text-lg">{userProfile.createdAt?.toLocaleDateString()}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h4 className="font-medium">Quick Actions</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Manage your account</p>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Dialog open={isAddLinkOpen} onOpenChange={setIsAddLinkOpen}>
+                      <DialogTrigger asChild>
+                        <Button size="sm">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add New Link
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                          <DialogTitle>Add New Link</DialogTitle>
+                          <DialogDescription>
+                            Create a new link for your bio page. Make sure to include the full URL.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="grid gap-2">
+                            <Label htmlFor="quick-title">Title</Label>
+                            <Input
+                              id="quick-title"
+                              placeholder="e.g., My YouTube Channel"
+                              value={newLink.title}
+                              onChange={(e) => setNewLink(prev => ({ ...prev, title: e.target.value }))}
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="quick-url">URL</Label>
+                            <Input
+                              id="quick-url"
+                              placeholder="https://example.com"
+                              value={newLink.url}
+                              onChange={(e) => setNewLink(prev => ({ ...prev, url: e.target.value }))}
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="quick-description">Description (Optional)</Label>
+                            <Textarea
+                              id="quick-description"
+                              placeholder="Brief description of this link"
+                              value={newLink.description}
+                              onChange={(e) => setNewLink(prev => ({ ...prev, description: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button variant="outline" onClick={() => setIsAddLinkOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button onClick={handleAddLink} disabled={!newLink.title || !newLink.url}>
+                            Add Link
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Export the component wrapped with authentication
+export default withAuth(DashboardPage);
+
                   <Plus className="w-6 h-6" />
                   <span>Add Link</span>
                   <span className="text-xs text-gray-500">Create your first bio link</span>
