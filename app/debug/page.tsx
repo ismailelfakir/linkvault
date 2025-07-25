@@ -62,8 +62,21 @@ export default function DebugPage() {
     try {
       console.log('🧪 Testing public profile lookup...');
       const { getPublicProfile } = await import('@/utils/firestore');
-      const result = await getPublicProfile('ismailelfakir');
+      
+      // Test with the exact username from your profile
+      const testUsername = userProfile?.username || 'ismailelfakir';
+      console.log('🧪 Testing with username:', testUsername);
+      
+      const result = await getPublicProfile(testUsername);
       console.log('🧪 Test result:', result);
+      
+      if (result) {
+        console.log('✅ Profile found successfully!');
+        console.log('👤 Profile:', result.profile);
+        console.log('🔗 Links:', result.links);
+      } else {
+        console.log('❌ Profile not found or error occurred');
+      }
     } catch (error) {
       console.error('🧪 Test error:', error);
     }
@@ -87,7 +100,10 @@ export default function DebugPage() {
               <Button onClick={checkCurrentUser} variant="outline">
                 Check Current User
               </Button>
-              <Button onClick={() => window.open('/ismailelfakir', '_blank')} variant="secondary">
+              <Button onClick={testPublicProfile} variant="secondary">
+                Test Profile Lookup
+              </Button>
+              <Button onClick={() => window.open(`/${userProfile?.username || 'ismailelfakir'}`, '_blank')} variant="secondary">
                 Test Profile Page
               </Button>
             </div>

@@ -247,7 +247,7 @@ export const getPublicProfile = async (username: string): Promise<{ profile: Use
     }
     
     const userDoc = querySnapshot.docs[0];
-    const profile = { id: userDoc.id, ...userDoc.data() } as UserProfile;
+    const profile = { ...userDoc.data() } as UserProfile;
     
     console.log('✅ Found profile:', profile);
     
@@ -267,6 +267,6 @@ export const getPublicProfile = async (username: string): Promise<{ profile: Use
     return { profile, links: activeLinks };
   } catch (error) {
     console.error('❌ Error getting public profile:', error);
-    throw error;
+    return null;
   }
 };

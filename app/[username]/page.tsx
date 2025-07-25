@@ -91,6 +91,9 @@ export default function PublicProfilePage() {
       setNotFound(false);
       
       console.log('🚀 Loading public profile for username:', username);
+      console.log('🚀 Username type:', typeof username);
+      console.log('🚀 Username length:', username?.length);
+      
       const profileData = await getPublicProfile(username);
       console.log('📦 Profile data received:', profileData);
       
