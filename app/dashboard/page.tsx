@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRouter } from 'next/navigation';
 import { 
   LogOut, 
@@ -68,11 +69,6 @@ function DashboardPage() {
     }
   };
 
-  const getIconComponent = (iconName: string) => {
-    // Simple icon mapping - you can expand this
-    return Globe;
-  };
-
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -124,63 +120,6 @@ function DashboardPage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Links</CardTitle>
-                <LinkIcon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{links.length}</div>
-                <p className="text-xs text-muted-foreground">
-                  {links.length === 0 ? 'No links created yet' : `${links.filter(l => l.isActive).length} active`}
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{links.reduce((sum, link) => sum + link.clicks, 0)}</div>
-                <p className="text-xs text-muted-foreground">
-                  {links.length === 0 ? 'No clicks recorded' : 'Total link clicks'}
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Profile Views</CardTitle>
-                <Eye className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">0</div>
-                <p className="text-xs text-muted-foreground">
-                  No views yet
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Followers</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">0</div>
-                <p className="text-xs text-muted-foreground">
-                  No followers yet
-                </p>
-              </CardContent>
-            </Card>
-
-
-
-
           {/* Main Dashboard Content */}
           <Tabs defaultValue="links" className="space-y-6">
             <TabsList className="grid w-full grid-cols-4">
@@ -199,9 +138,9 @@ function DashboardPage() {
                     <LinkIcon className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">0</div>
+                    <div className="text-2xl font-bold">{links.length}</div>
                     <p className="text-xs text-muted-foreground">
-                      Links created
+                      {links.length === 0 ? 'No links created yet' : `${links.filter(l => l.isActive).length} active`}
                     </p>
                   </CardContent>
                 </Card>
@@ -212,9 +151,9 @@ function DashboardPage() {
                     <BarChart3 className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">0</div>
+                    <div className="text-2xl font-bold">{links.reduce((sum, link) => sum + link.clicks, 0)}</div>
                     <p className="text-xs text-muted-foreground">
-                      Clicks recorded
+                      {links.length === 0 ? 'No clicks recorded' : 'Total link clicks'}
                     </p>
                   </CardContent>
                 </Card>
@@ -227,7 +166,7 @@ function DashboardPage() {
                   <CardContent>
                     <div className="text-2xl font-bold">0</div>
                     <p className="text-xs text-muted-foreground">
-                      Page views
+                      No views yet
                     </p>
                   </CardContent>
                 </Card>
@@ -238,7 +177,7 @@ function DashboardPage() {
                     <Users className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">0</div>
+                    <div className="text-2xl font-bold">{links.filter(l => l.isActive).length}</div>
                     <p className="text-xs text-muted-foreground">
                       Currently active
                     </p>
@@ -343,9 +282,16 @@ function DashboardPage() {
                             {userProfile.bio || 'Add a bio to tell visitors about yourself'}
                           </p>
                           <div className="space-y-3">
-                            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 text-gray-500 dark:text-gray-400 text-sm">
-                              Your links will appear here
-                            </div>
+                            {links.filter(link => link.isActive).slice(0, 3).map((link) => (
+                              <div key={link.id} className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 text-gray-900 dark:text-white text-sm">
+                                {link.title}
+                              </div>
+                            ))}
+                            {links.filter(link => link.isActive).length === 0 && (
+                              <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 text-gray-500 dark:text-gray-400 text-sm">
+                                Your links will appear here
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -412,5 +358,3 @@ function DashboardPage() {
 
 // Export the component wrapped with authentication
 export default withAuth(DashboardPage);
-  )
-}
