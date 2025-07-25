@@ -448,28 +448,3 @@ function DashboardPage() {
 
 // Export the component wrapped with authentication
 export default withAuth(DashboardPage);
-
-                  <Plus className="w-6 h-6" />
-                  <span>Add Link</span>
-                  <span className="text-xs text-gray-500">Create your first bio link</span>
-                </Button>
-                
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
-                  <Settings className="w-6 h-6" />
-                  <span>Customize Theme</span>
-                  <span className="text-xs text-gray-500">Change colors and layout</span>
-                </Button>
-                
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
-                  <BarChart3 className="w-6 h-6" />
-                  <span>View Analytics</span>
-                  <span className="text-xs text-gray-500">Track your performance</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-}
