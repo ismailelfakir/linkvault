@@ -90,9 +90,12 @@ export default function PublicProfilePage() {
       setLoading(true);
       setNotFound(false);
       
+      console.log('Loading public profile for username:', username);
       const profileData = await getPublicProfile(username);
+      console.log('Profile data received:', profileData);
       
       if (!profileData) {
+        console.log('No profile data found, setting notFound to true');
         setNotFound(true);
         return;
       }

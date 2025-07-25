@@ -87,7 +87,9 @@ export default function LinkBuilder() {
   const loadLinks = async () => {
     try {
       setLoading(true);
+      console.log('Loading links for user:', user!.uid);
       const userLinks = await getUserLinks(user!.uid);
+      console.log('Loaded links:', userLinks);
       setLinks(userLinks);
     } catch (error) {
       console.error('Error loading links:', error);
@@ -103,6 +105,8 @@ export default function LinkBuilder() {
     try {
       setSubmitting(true);
       setError('');
+      
+      console.log('Creating link:', newLink);
 
       // Validate URL format
       let url = newLink.url;
@@ -121,6 +125,7 @@ export default function LinkBuilder() {
       };
 
       const createdLink = await createLink(linkData);
+      console.log('Link created successfully:', createdLink);
       setLinks(prev => [...prev, createdLink]);
       setNewLink({ title: '', url: '', description: '', icon: 'globe' });
       setIsAddLinkOpen(false);

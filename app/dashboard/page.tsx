@@ -51,7 +51,9 @@ function DashboardPage() {
   const loadLinks = async () => {
     try {
       setLoading(true);
+      console.log('Dashboard loading links for user:', user!.uid);
       const userLinks = await getUserLinks(user!.uid);
+      console.log('Dashboard loaded links:', userLinks);
       setLinks(userLinks);
     } catch (error) {
       console.error('Error loading links:', error);

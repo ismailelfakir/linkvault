@@ -90,7 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         uid: user.uid,
         email: user.email!,
         displayName,
-        username: displayName.toLowerCase().replace(/\s+/g, ''),
+        username: displayName.toLowerCase().replace(/[^a-z0-9]/g, ''),
         bio: '',
         theme: 'default',
         isPublic: true,
@@ -98,7 +98,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updatedAt: new Date(),
       };
       
-      await setDoc(doc(db, 'users', user.uid), userProfile);
+      console.log('Creating user profile:', userProfile);
+      await setDoc(doc(db, 'users', user.uid), {
+        ...userProfile,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      });
       console.log('User profile created in Firestore');
       setUserProfile(userProfile);
     } catch (error) {

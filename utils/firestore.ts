@@ -66,7 +66,7 @@ export const createUserProfile = async (profileData: Omit<UserProfile, 'createdA
       updatedAt: Timestamp.now(),
     };
     
-    await updateDoc(userRef, userData);
+    await setDoc(userRef, userData);
     return userData;
   } catch (error) {
     console.error('Error creating user profile:', error);
@@ -232,17 +232,24 @@ export const getUserAnalytics = async (userId: string, days: number = 30) => {
 // Public Profile Functions
 export const getPublicProfile = async (username: string): Promise<{ profile: UserProfile; links: Link[] } | null> => {
   try {
+    console.log('Looking for username:', username);
+    
     // First try to find by username field
     const usersRef = collection(db, 'users');
     const q = query(usersRef, where('username', '==', username.toLowerCase()), limit(1));
     const querySnapshot = await getDocs(q);
     
+    console.log('Username query results:', querySnapshot.size);
+    
     if (querySnapshot.empty) {
-      // Fallback: try to find by displayName (for existing users)
-      const displayNameQuery = query(usersRef, where('displayName', '==', username), limit(1));
+      // Fallback: try to find by displayName converted to username format
+      const displayNameQuery = query(usersRef, where('displayName', '==', username.replace(/([a-z])([A-Z])/g, '$1 $2')), limit(1));
       const displayNameSnapshot = await getDocs(displayNameQuery);
       
+      console.log('DisplayName fallback results:', displayNameSnapshot.size);
+      
       if (displayNameSnapshot.empty) {
+        console.log('No profile found for:', username);
         return null;
       }
       
@@ -260,6 +267,8 @@ export const getPublicProfile = async (username: string): Promise<{ profile: Use
     
     const userDoc = querySnapshot.docs[0];
     const profile = { id: userDoc.id, ...userDoc.data() } as UserProfile;
+    
+    console.log('Found profile:', profile);
     
     // Check if profile is public
     if (!profile.isPublic) return null;
