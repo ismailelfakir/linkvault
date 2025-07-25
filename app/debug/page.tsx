@@ -103,7 +103,11 @@ export default function DebugPage() {
               <Button onClick={testPublicProfile} variant="secondary">
                 Test Profile Lookup
               </Button>
-              <Button onClick={() => window.open(`/${userProfile?.username || 'ismailelfakir'}`, '_blank')} variant="secondary">
+              <Button onClick={() => {
+                const url = `/${userProfile?.username || 'ismailelfakir'}`;
+                console.log('🌐 Opening profile page:', url);
+                window.open(url, '_blank');
+              }} variant="secondary">
                 Test Profile Page
               </Button>
             </div>

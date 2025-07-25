@@ -91,8 +91,6 @@ export default function PublicProfilePage() {
       setNotFound(false);
       
       console.log('🚀 Loading public profile for username:', username);
-      console.log('🚀 Username type:', typeof username);
-      console.log('🚀 Username length:', username?.length);
       
       const profileData = await getPublicProfile(username);
       console.log('📦 Profile data received:', profileData);
@@ -103,7 +101,9 @@ export default function PublicProfilePage() {
         return;
       }
       
-      console.log('✅ Setting profile and links:', profileData.profile, profileData.links);
+      console.log('✅ Setting profile and links');
+      console.log('👤 Profile:', profileData.profile);
+      console.log('🔗 Links:', profileData.links);
       setProfile(profileData.profile);
       setLinks(profileData.links);
     } catch (error) {
