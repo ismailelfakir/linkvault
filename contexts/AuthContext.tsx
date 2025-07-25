@@ -76,10 +76,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signup = async (email: string, password: string, displayName: string) => {
     try {
+      console.log('Attempting signup with:', { email, displayName });
       const { user } = await createUserWithEmailAndPassword(auth, email, password);
+      console.log('User created successfully:', user.uid);
       
       // Update the user's display name
       await updateProfile(user, { displayName });
+      console.log('Display name updated');
       
       // Create user profile in Firestore
       const userProfile: UserProfile = {
@@ -93,9 +96,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
       
       await setDoc(doc(db, 'users', user.uid), userProfile);
+      console.log('User profile created in Firestore');
       setUserProfile(userProfile);
     } catch (error) {
-      console.error('Signup error:', error);
+      console.error('Detailed signup error:', error);
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error code:', (error as any).code);
+      }
       throw error;
     }
   };

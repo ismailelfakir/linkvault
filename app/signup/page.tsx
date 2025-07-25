@@ -62,9 +62,32 @@ export default function SignupPage() {
 
     try {
       await signup(formData.email, formData.password, formData.displayName);
+      console.log('Signup successful, redirecting to dashboard');
       router.push('/dashboard');
     } catch (error: any) {
-      setError(error.message || 'Failed to create account');
+      console.error('Signup error in component:', error);
+      let errorMessage = 'Failed to create account';
+      
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/network-request-failed':
+            errorMessage = 'Network error. Please check your internet connection and Firebase configuration.';
+            break;
+          case 'auth/email-already-in-use':
+            errorMessage = 'An account with this email already exists.';
+            break;
+          case 'auth/weak-password':
+            errorMessage = 'Password is too weak. Please choose a stronger password.';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = 'Please enter a valid email address.';
+            break;
+          default:
+            errorMessage = error.message || 'Failed to create account';
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
