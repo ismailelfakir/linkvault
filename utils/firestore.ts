@@ -25,6 +25,7 @@ export interface UserProfile {
   theme?: string;
   customDomain?: string;
   isPublic: boolean;
+  isPro?: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

@@ -9,7 +9,7 @@ import {
   onAuthStateChanged,
   updateProfile,
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, Timestamp } from 'firebase/firestore';
 import { auth, db } from '@/utils/firebase';
 
 interface UserProfile {
@@ -21,6 +21,7 @@ interface UserProfile {
   avatar?: string;
   theme?: string;
   isPublic?: boolean;
+  isPro?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -94,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         bio: '',
         theme: 'default',
         isPublic: true,
+        isPro: false,
         createdAt: new Date(),
         updatedAt: new Date(),
       };

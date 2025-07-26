@@ -6,6 +6,7 @@ import { getUserLinks } from '@/utils/firestore';
 import { withAuth } from '@/components/withAuth';
 import LinkBuilder from '@/components/LinkBuilder';
 import Analytics from '@/components/Analytics';
+import UpgradeToPro from '@/components/UpgradeToPro';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -20,7 +21,8 @@ import {
   Users,
   Eye,
   ExternalLink,
-  Globe
+  Globe,
+  Crown
 } from 'lucide-react';
 
 interface Link {
@@ -287,59 +289,77 @@ function DashboardPage() {
             </TabsContent>
             
             <TabsContent value="settings">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Account Settings</CardTitle>
-                  <CardDescription>
-                    Manage your account preferences and security
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-3">
-                        <div>
-                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Account Status</span>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                              Active
-                            </Badge>
+              <div className="space-y-6">
+                {/* Upgrade to Pro Section */}
+                <UpgradeToPro />
+                
+                {/* Account Settings */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Account Settings</CardTitle>
+                    <CardDescription>
+                      Manage your account preferences and security
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <div>
+                            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Account Status</span>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                Active
+                              </Badge>
+                              {userProfile.isPro && (
+                                <Badge className="bg-yellow-500 text-white">
+                                  <Crown className="w-3 h-3 mr-1" />
+                                  Pro
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Plan</span>
+                            <p className="text-sm mt-1">
+                              {userProfile.isPro ? 'Pro (Lifetime)' : 'Free'}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Theme</span>
+                            <p className="text-sm mt-1">{userProfile.theme || 'Default'}</p>
                           </div>
                         </div>
-                        <div>
-                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Theme</span>
-                          <p className="text-sm mt-1">{userProfile.theme || 'Default'}</p>
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <div>
-                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Profile URL</span>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <span className="text-sm font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                              /{userProfile.username || userProfile.displayName.toLowerCase().replace(/\s+/g, '')}
-                            </span>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-auto p-0"
-                              onClick={() => window.open(`/${userProfile.username || userProfile.displayName.toLowerCase().replace(/\s+/g, '')}`, '_blank')}
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                            </Button>
+                        <div className="space-y-3">
+                          <div>
+                            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Profile URL</span>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <span className="text-sm font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                                /{userProfile.username || userProfile.displayName.toLowerCase().replace(/\s+/g, '')}
+                              </span>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-auto p-0"
+                                onClick={() => window.open(`/${userProfile.username || userProfile.displayName.toLowerCase().replace(/\s+/g, '')}`, '_blank')}
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
+                      
+                      <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
+                        <Button variant="destructive" onClick={handleLogout}>
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Sign Out
+                        </Button>
+                      </div>
                     </div>
-                    
-                    <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
-                      <Button variant="destructive" onClick={handleLogout}>
-                        <LogOut className="w-4 h-4 mr-2" />
-                        Sign Out
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
