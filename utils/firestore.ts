@@ -190,6 +190,7 @@ export const deleteLink = async (linkId: string) => {
 // Analytics Functions
 export const recordClick = async (linkId: string, userId: string, metadata?: Partial<ClickEvent>) => {
   try {
+    console.log('🔥 Recording click for link:', linkId, 'user:', userId);
     const clicksRef = collection(db, 'clicks');
     const clickData = {
       linkId,
@@ -198,7 +199,9 @@ export const recordClick = async (linkId: string, userId: string, metadata?: Par
       ...metadata,
     };
     
+    console.log('🔥 Click data:', clickData);
     await addDoc(clicksRef, clickData);
+    console.log('🔥 Click recorded in Firestore');
     
     // Update link click count
     const linkRef = doc(db, 'links', linkId);
@@ -206,7 +209,9 @@ export const recordClick = async (linkId: string, userId: string, metadata?: Par
     
     if (linkSnap.exists()) {
       const currentClicks = linkSnap.data().clicks || 0;
+      console.log('🔥 Updating link click count from', currentClicks, 'to', currentClicks + 1);
       await updateDoc(linkRef, { clicks: currentClicks + 1 });
+      console.log('🔥 Link click count updated successfully');
     }
     
     return clickData;
@@ -218,9 +223,11 @@ export const recordClick = async (linkId: string, userId: string, metadata?: Par
 
 export const getUserAnalytics = async (userId: string, days: number = 30) => {
   try {
+    console.log('📊 Getting analytics for user:', userId, 'for', days, 'days');
     const clicksRef = collection(db, 'clicks');
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
+    console.log('📊 Fetching clicks since:', startDate);
     
     const q = query(
       clicksRef,
@@ -236,9 +243,11 @@ export const getUserAnalytics = async (userId: string, days: number = 30) => {
       clicks.push({ id: doc.id, ...doc.data() } as ClickEvent);
     });
     
+    console.log('📊 Found', clicks.length, 'clicks');
     return clicks;
   } catch (error) {
     console.error('Error getting user analytics:', error);
+    console.error('❌ Analytics error details:', error.message);
     throw error;
   }
 };

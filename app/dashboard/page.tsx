@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getUserLinks } from '@/utils/firestore';
 import { withAuth } from '@/components/withAuth';
 import LinkBuilder from '@/components/LinkBuilder';
+import Analytics from '@/components/Analytics';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -192,25 +193,7 @@ function DashboardPage() {
             </TabsContent>
             
             <TabsContent value="analytics">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Analytics</CardTitle>
-                  <CardDescription>
-                    Track your link performance and visitor insights
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8">
-                    <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      Analytics Coming Soon
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Detailed analytics will be available once you start getting clicks
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <Analytics />
             </TabsContent>
             
             <TabsContent value="profile">

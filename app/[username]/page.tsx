@@ -78,6 +78,7 @@ export default function PublicProfilePage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [clickingLinkId, setClickingLinkId] = useState<string | null>(null);
+  const [clickingLinkId, setClickingLinkId] = useState<string | null>(null);
 
   useEffect(() => {
     if (username) {
@@ -290,17 +291,23 @@ export default function PublicProfilePage() {
                             </h3>
                             {link.description && (
                               <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                const isClicking = clickingLinkId === link.id;
                                 {link.description}
                               </p>
                             )}
                             <div className="flex items-center space-x-2 mt-1">
-                              <Badge variant="secondary" className="text-xs">
+                    onClick={() => handleLinkClick(link)}
+                    disabled={isClicking}
                                 {link.clicks} clicks
                               </Badge>
                             </div>
                           </div>
                           
-                          <ExternalLink className="w-5 h-5 text-gray-400 group-hover:text-purple-500 transition-colors duration-200 flex-shrink-0" />
+                          {isClicking ? (
+                            <Loader2 className="w-6 h-6 text-white animate-spin" />
+                          ) : (
+                            <IconComponent className="w-6 h-6 text-white" />
+                          )}
                         </div>
                       </div>
                     </button>
