@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserAnalytics, getUserLinks } from '@/utils/firestore';
+import ProFeatureGuard from '@/components/ProFeatureGuard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -56,6 +57,7 @@ interface LinkAnalytics {
 
 export default function Analytics() {
   const { user } = useAuth();
+  const { userProfile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [analytics, setAnalytics] = useState<LinkAnalytics[]>([]);
@@ -259,14 +261,22 @@ export default function Analytics() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <BarChart3 className="w-5 h-5 mr-2" />
-            Link Performance
+            {userProfile?.isPro ? 'Advanced Link Performance' : 'Link Performance'}
           </CardTitle>
           <CardDescription>
-            Detailed analytics for each of your bio links
+            {userProfile?.isPro 
+              ? 'Detailed analytics for each of your bio links with advanced insights'
+              : 'Basic analytics for your bio links'
+            }
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {analytics.length === 0 ? (
+          {!userProfile?.isPro ? (
+            <ProFeatureGuard 
+              feature="Advanced Analytics" 
+              description="Get detailed click analytics, visitor insights, geographic data, and performance trends with LinkVault Pro."
+            />
+          ) : analytics.length === 0 ? (
             <div className="text-center py-8">
               <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
@@ -278,6 +288,19 @@ export default function Analytics() {
             </div>
           ) : (
             <div className="space-y-4">
+              {/* Pro Analytics Header */}
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+                <div className="flex items-center space-x-2">
+                  <Crown className="w-5 h-5 text-purple-600" />
+                  <span className="font-medium text-purple-900 dark:text-purple-100">
+                    Pro Analytics Enabled
+                  </span>
+                </div>
+                <p className="text-sm text-purple-700 dark:text-purple-300 mt-1">
+                  You're viewing advanced analytics with detailed insights and performance metrics.
+                </p>
+              </div>
+              
               {analytics.map((link) => (
                 <div
                   key={link.linkId}
@@ -329,6 +352,14 @@ export default function Analytics() {
                       </p>
                       <p className="text-gray-500">Week</p>
                     </div>
+                    {userProfile?.isPro && (
+                      <div className="text-center">
+                        <p className="font-semibold text-purple-600">
+                          {Math.round((link.clicksThisWeek / Math.max(link.totalClicks, 1)) * 100)}%
+                        </p>
+                        <p className="text-gray-500">CTR</p>
+                      </div>
+                    )}
                     <Badge variant={link.totalClicks > 0 ? "default" : "secondary"}>
                       {link.totalClicks > 0 ? 'Active' : 'No clicks'}
                     </Badge>

@@ -21,6 +21,7 @@ import {
   GripVertical,
   Sparkles,
   Wand2,
+  Crown,
   Youtube,
   Instagram,
   Twitter,
@@ -70,6 +71,7 @@ export default function LinkBuilder() {
   const { user, userProfile } = useAuth();
   const [links, setLinks] = useState<Link[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showLimitWarning, setShowLimitWarning] = useState(false);
   const [isAddLinkOpen, setIsAddLinkOpen] = useState(false);
   const [isAiSuggestOpen, setIsAiSuggestOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<Link | null>(null);
@@ -108,6 +110,12 @@ export default function LinkBuilder() {
 
   const handleAddLink = async () => {
     if (!user || !newLink.title || !newLink.url) return;
+
+    // Check link limit for free users
+    if (!userProfile?.isPro && links.length >= 5) {
+      setShowLimitWarning(true);
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -288,9 +296,12 @@ export default function LinkBuilder() {
           <div className="flex gap-2">
             <Dialog open={isAddLinkOpen} onOpenChange={setIsAddLinkOpen}>
               <DialogTrigger asChild>
-                <Button className="flex-1">
+                <Button 
+                  className="flex-1" 
+                  disabled={!userProfile?.isPro && links.length >= 5}
+                >
                   <Plus className="w-4 h-4 mr-2" />
-                  Add New Link
+                  {!userProfile?.isPro && links.length >= 5 ? 'Link Limit Reached' : 'Add New Link'}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[500px]">
@@ -459,6 +470,29 @@ export default function LinkBuilder() {
               </DialogContent>
             </Dialog>
           </div>
+          
+          {/* Link Limit Warning */}
+          {!userProfile?.isPro && links.length >= 4 && (
+            <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-yellow-800 dark:text-yellow-200 mb-1">
+                    {links.length >= 5 ? 'Link Limit Reached' : 'Almost at your limit!'}
+                  </h4>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                    {links.length >= 5 
+                      ? 'Free users can have up to 5 links. Upgrade to Pro for unlimited links.'
+                      : `You have ${links.length}/5 links. Upgrade to Pro for unlimited links.`
+                    }
+                  </p>
+                </div>
+                <Button size="sm" className="bg-gradient-to-r from-purple-500 to-blue-500">
+                  <Crown className="w-4 h-4 mr-2" />
+                  Upgrade to Pro
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -642,6 +676,22 @@ export default function LinkBuilder() {
                 ) : (
                   'Update Link'
                 )}
+              </Button>
+            </div>
+          ) : !userProfile?.isPro && links.length >= 5 ? (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Crown className="w-8 h-8 text-yellow-600" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                Link Limit Reached
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Free users can have up to 5 links. Upgrade to Pro for unlimited links and premium features.
+              </p>
+              <Button className="bg-gradient-to-r from-purple-500 to-blue-500">
+                <Crown className="w-4 h-4 mr-2" />
+                Upgrade to Pro
               </Button>
             </div>
           </DialogContent>

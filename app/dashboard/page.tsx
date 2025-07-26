@@ -7,6 +7,8 @@ import { withAuth } from '@/components/withAuth';
 import LinkBuilder from '@/components/LinkBuilder';
 import Analytics from '@/components/Analytics';
 import UpgradeToPro from '@/components/UpgradeToPro';
+import ThemeSelector from '@/components/ThemeSelector';
+import ProfileSettings from '@/components/ProfileSettings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -199,97 +201,14 @@ function DashboardPage() {
             </TabsContent>
             
             <TabsContent value="profile">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Profile Information</CardTitle>
-                    <CardDescription>
-                      Manage your public profile details
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <Avatar className="w-16 h-16">
-                        <AvatarImage src={userProfile.avatar} />
-                        <AvatarFallback className="text-lg">
-                          {getInitials(userProfile.displayName)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h3 className="font-medium text-lg">{userProfile.displayName}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {userProfile.email}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div>
-                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Bio</span>
-                        <p className="text-sm">
-                          {userProfile.bio || 'No bio added yet'}
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Member Since</span>
-                        <p className="text-sm">
-                          {userProfile.createdAt?.toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <Button variant="outline" className="w-full">
-                      <Settings className="w-4 h-4 mr-2" />
-                      Edit Profile
-                    </Button>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Bio Link Preview</CardTitle>
-                    <CardDescription>
-                      This is how your page appears to visitors
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="bg-gradient-to-br from-purple-100/50 to-blue-100/50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-                      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700 max-w-sm mx-auto">
-                        <div className="text-center">
-                          <Avatar className="w-20 h-20 mx-auto mb-4">
-                            <AvatarImage src={userProfile.avatar} />
-                            <AvatarFallback className="text-lg">
-                              {getInitials(userProfile.displayName)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                            {userProfile.displayName}
-                          </h3>
-                          <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm">
-                            {userProfile.bio || 'Add a bio to tell visitors about yourself'}
-                          </p>
-                          <div className="space-y-3">
-                            {links.filter(link => link.isActive).slice(0, 3).map((link) => (
-                              <div key={link.id} className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 text-gray-900 dark:text-white text-sm">
-                                {link.title}
-                              </div>
-                            ))}
-                            {links.filter(link => link.isActive).length === 0 && (
-                              <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 text-gray-500 dark:text-gray-400 text-sm">
-                                Your links will appear here
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+              <ProfileSettings />
             </TabsContent>
             
             <TabsContent value="settings">
               <div className="space-y-6">
+                {/* Theme Selector */}
+                <ThemeSelector />
+                
                 {/* Upgrade to Pro Section */}
                 <UpgradeToPro />
                 
