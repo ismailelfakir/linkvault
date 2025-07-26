@@ -78,7 +78,6 @@ export default function PublicProfilePage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [clickingLinkId, setClickingLinkId] = useState<string | null>(null);
-  const [clickingLinkId, setClickingLinkId] = useState<string | null>(null);
 
   useEffect(() => {
     if (username) {
@@ -121,7 +120,7 @@ export default function PublicProfilePage() {
     try {
       setClickingLinkId(link.id);
       
-      console.log('Recording click for link:', link.id);
+      console.log('🔥 Recording click for link:', link.id);
       
       // Record the click
       await recordClick(link.id, link.userId, {
@@ -129,7 +128,7 @@ export default function PublicProfilePage() {
         referrer: document.referrer,
       });
       
-      console.log('Click recorded successfully');
+      console.log('🔥 Click recorded successfully');
       
       // Update local click count
       setLinks(prev => prev.map(l => 
@@ -141,7 +140,7 @@ export default function PublicProfilePage() {
       // Open link in new tab
       window.open(link.url, '_blank', 'noopener,noreferrer');
     } catch (error) {
-      console.error('Error recording click:', error);
+      console.error('❌ Error recording click:', error);
       // Still open the link even if click recording fails
       window.open(link.url, '_blank', 'noopener,noreferrer');
     } finally {
@@ -291,23 +290,17 @@ export default function PublicProfilePage() {
                             </h3>
                             {link.description && (
                               <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                const isClicking = clickingLinkId === link.id;
                                 {link.description}
                               </p>
                             )}
                             <div className="flex items-center space-x-2 mt-1">
-                    onClick={() => handleLinkClick(link)}
-                    disabled={isClicking}
+                              <Badge variant="secondary" className="text-xs">
                                 {link.clicks} clicks
                               </Badge>
                             </div>
                           </div>
                           
-                          {isClicking ? (
-                            <Loader2 className="w-6 h-6 text-white animate-spin" />
-                          ) : (
-                            <IconComponent className="w-6 h-6 text-white" />
-                          )}
+                          <ExternalLink className="w-5 h-5 text-gray-400 group-hover:text-purple-500 transition-colors duration-200 flex-shrink-0" />
                         </div>
                       </div>
                     </button>
