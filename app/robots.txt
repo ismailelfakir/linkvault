@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /help
+Allow: /privacy
+Allow: /terms
+Allow: /login
+Allow: /signup
+
+Disallow: /dashboard
+Disallow: /debug
+Disallow: /api
+
+Sitemap: https://linkvault.com/sitemap.xml

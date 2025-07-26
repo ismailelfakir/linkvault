@@ -1,10 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // output: 'export',
   eslint: {
     ignoreDuringBuilds: true,
   },
-  images: { unoptimized: true },
+  images: { 
+    unoptimized: true,
+    domains: ['via.placeholder.com', 'images.unsplash.com', 'pexels.com']
+  },
+  experimental: {
+    optimizeCss: true,
+  },
+  compress: true,
+  poweredByHeader: false,
+  generateEtags: false,
+  httpAgentOptions: {
+    keepAlive: true,
+  },
 };
 
 module.exports = nextConfig;
